@@ -18,13 +18,8 @@ ENV LANG=C.UTF-8 \
 # Set up workdir for environment
 WORKDIR /app
 
-# Install OS package dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends && \
-    apt-get purge && \
-    rm -rf /var/lib/apt/lists/* /tmp/* && \
-    # Install poetry
-    pip install "poetry==$POETRY_VERSION"
+# Install Poetry
+RUN pip install "poetry==$POETRY_VERSION"
 
 # Setup the virtualenv
 RUN python -m venv /.venv
