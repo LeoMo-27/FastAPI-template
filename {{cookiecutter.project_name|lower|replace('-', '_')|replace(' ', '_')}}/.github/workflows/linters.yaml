@@ -1,0 +1,77 @@
+name: linters
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/linters.yaml"
+      - "**.py"
+      - "Makefile"
+      - "pyproject.toml"
+      - "poetry.lock"
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1.3.3
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          version: 1.4.1
+
+      # Cache the dependencies installed by Poetry.
+      - name: Set up Poetry cache
+        uses: actions/cache@v3
+        id: cached-poetry
+        with:
+          key: cached-poetry-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+
+      - name: Install dependencies
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        run: make build-dev
+
+      - name: Lint with Black
+        run: make black
+
+  isort:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1.3.3
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          version: 1.4.1
+
+      # Cache the dependencies installed by Poetry.
+      - name: Set up Poetry cache
+        uses: actions/cache@v3
+        id: cached-poetry
+        with:
+          key: cached-poetry-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+
+      - name: Install dependencies
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        run: make build-dev
+
+      - name: Lint with Isort
+        run: make isort

@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - 5432
+  web:
+    depends_on:
+      - db
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        DEV: "true"
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-user}
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: ${ENVIRONMENT:-DEV}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-10080}
+      REFRESH_TOKEN_EXPIRE_MINUTES: ${REFRESH_TOKEN_EXPIRE_MINUTES:-20160}
+    command: uvicorn src.main:app --reload --host 0.0.0.0
+    ports:
+      - 8000:8000
+    volumes:
+      - ../:/app
+
+volumes:
+  postgres_data:
